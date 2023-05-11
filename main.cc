@@ -7,8 +7,8 @@
 #include "G4RunManager.hh"
 #include "G4MTRunManager.hh"
 #include "G4UnitsTable.hh"
-
 #include "G4UImanager.hh"
+
 #include "G4VisExecutive.hh"
 #include "G4UIExecutive.hh"
 
@@ -52,8 +52,8 @@ int main(int argc, char** argv) {
   
   G4String macro;
   G4String session;
-
   G4int nThreads = 1;
+
 
   for ( G4int i=1; i<argc; i=i+2 ) {
     if      ( G4String(argv[i]) == "-m" ) macro   = argv[i+1];

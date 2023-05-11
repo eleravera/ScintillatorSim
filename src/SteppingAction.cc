@@ -18,7 +18,7 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
 
   //   Take care, because this volume might not be available: be sure that the pointer  
   //   "volume" is non-NULL, otherwise  any volume->Get... would cause a crash.
-  if ((volume!=NULL) && (volume->GetName() == "PVC") && (aStep->GetTrack()->GetParticleDefinition() == G4Electron::Electron()) ) 
+  if ((volume!=NULL) && (volume->GetName() == "PVC_Layer0") && (aStep->GetTrack()->GetParticleDefinition() == G4Electron::Electron()) ) 
     { 
       fRunAction->AddTrackLength(aStep->GetStepLength()); 
     }   

@@ -10,6 +10,9 @@
 #include <G4Orb.hh>
 #include <G4SDManager.hh>
 #include <G4UserLimits.hh>
+#include <G4MultiFunctionalDetector.hh>
+#include <G4VPrimitiveScorer.hh>
+#include <G4PSEnergyDeposit.hh>
 
 #include <sstream>
 
@@ -134,8 +137,8 @@ void DetectorConstruction::constructScintillator() {
 
 
 void DetectorConstruction::constructPVC() {
-    solidPVC = new G4Box("PVC", 0.5*info->PVCSize[0]*mm, 0.5*info->PVCSize[1]*mm, 0.5*info->PVCSize[2]*mm);  
-    logicPVC = new G4LogicalVolume(solidPVC, PVC, "PVC");            
+    solidPVC = new G4Box("PVCLayer", 0.5*info->PVCSize[0]*mm, 0.5*info->PVCSize[1]*mm, 0.5*info->PVCSize[2]*mm);  
+    logicPVC = new G4LogicalVolume(solidPVC, PVC, "PVCLayer");            
     fStepLimit = new G4UserLimits(info->stepLimiter);
     logicPVC->SetUserLimits(fStepLimit);
 
@@ -153,87 +156,34 @@ void DetectorConstruction::constructPVC() {
     {
         PVCLayerPositions.push_back({info->PVCPos[0]*mm, info->PVCPos[1]*mm, minX + i * info->PVCSize[2]*mm});
         //scintillatorPositions.push_back({minX + (i * 2 + 1) * info->PVCthickness, 0, 0});
-        
         //physPVC  = new G4PVPlacement(0, G4ThreeVector(info->PVCPos[0]*mm, info->PVCPos[1]*mm, info->PVCPos[2]*mm), logicPVC, "PVC", logicWorld, false, 0, checkOverlaps); 
-
     }
 
     for (int i = 0; i < info->PVCNumOfLayer; i++)
     {
-        ostringstream aName; aName << "PVC" << i;
+        ostringstream aName; aName << "PVCLayer" << i;
         //new G4PVPlacement(nullptr, PVCLayerPositions[i],
 		//	  logicPVC, aName.str(), logicWorld, 0, i, checkOverlaps);
-
-    
-    
         physPVC  = new G4PVPlacement(nullptr, PVCLayerPositions[i], logicPVC, aName.str(), logicWorld, false, 0, checkOverlaps);
-    
     }
-
-
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// Task 1c.1: Include the proper header for the magnetic field messenger.
-#include <G4GlobalMagFieldMessenger.hh>
 
 // Task 4c.1: Include the proper header for the multi-functional detector
 
 // Task 4c.1: Include the proper header for energy deposit primitive scorer
 
-// Task 1c.1: Uncomment the following method definition and implement it
 void DetectorConstruction::ConstructSDandField()
 {
-    // Task 1c.1: Create the magnetic field messenger
-    /*
-    G4ThreeVector fieldValue = G4ThreeVector(0.0, 0.2 * tesla, 0.0);
-    G4GlobalMagFieldMessenger* fMagFieldMessenger = new G4GlobalMagFieldMessenger(fieldValue);
-    fMagFieldMessenger->SetVerboseLevel(1);  // to set messenger verbosity
-    */
-
     G4SDManager* sdManager = G4SDManager::GetSDMpointer();
-    sdManager->SetVerboseLevel(2);  // Useful for 4c
+    sdManager->SetVerboseLevel(2);
 
-    // Task 4c.1: Create 2 instances of G4MultiFunctionalDetector (for absorber and scintillator)
-    // G4MultiFunctionalDetector* absorberDetector = ...
+    G4MultiFunctionalDetector* PVCLayerDetector = new G4MultiFunctionalDetector("PVCLayer");
+    G4VPrimitiveScorer* PVCScorer = new G4PSEnergyDeposit("energy"); 
+    PVCLayerDetector->RegisterPrimitive(PVCScorer);
 
-    // Task 4c.1: Create 2 primitive scorers for the dose and assign them to respective detectors
-    // G4VPrimitiveScorer* absorberScorer = ...
-
-    // Task 4c.1 Assign multi-functional detectors to the logical volumes and register them to 
-    //   the SDmanager
-    // SetSensitiveDetector("....");
-    // sdManager->AddNewDetector(...);
+    //Assign multi-functional detectors to the logical volumes and register them to the SDmanager
+    SetSensitiveDetector("PVCLayer", PVCLayerDetector);
+    sdManager->AddNewDetector(PVCLayerDetector);
 
     // Task 4d.1: Comment out the attachment of previous sensitive detectors
     // Task 4d.1: Create and assign the custom sensitive detector. Do not forget to register them 

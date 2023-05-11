@@ -22,7 +22,7 @@ void ActionInitialization::Build() const
     SetUserAction(new StackingAction(info, theRunAction));
     SetUserAction(new SteppingAction(info, theRunAction));
     SetUserAction(new PrimaryGeneratorAction(info));
-
+    SetUserAction(new EventAction(info));
 }
 
 void ActionInitialization::BuildForMaster() const

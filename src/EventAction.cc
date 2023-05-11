@@ -8,33 +8,42 @@
 #include "Analysis.hh"
 
 // Task 4d.2: Uncomment the following line
-// #include "EnergyTimeHit.hh"
+// #include "EnergyTimeHit.hh" 
 
 using namespace std;
+
+EventAction::EventAction(LabInfo *info_)
+    : G4UserEventAction()
+{
+    info = info_;
+}
+
+EventAction::~EventAction(){}
+
 
 void EventAction::EndOfEventAction(const G4Event* event)
 {
     G4SDManager* sdm = G4SDManager::GetSDMpointer();
     G4AnalysisManager* analysis = G4AnalysisManager::Instance();
 
-    // Task 4c.2: Get the hit collections
-    G4HCofThisEvent* hcofEvent = nullptr;
-
-    // If there is no hit collection, there is nothing to be done
+    //Get the hit collections: If there is no hit collection, there is nothing to be done
+    G4HCofThisEvent* hcofEvent = event->GetHCofThisEvent();
     if(!hcofEvent) return;
 
-    // The variable fAbsorberId is initialized to -1 (see EventAction.hh) so this block 
+
+    // The variable fPVC_Id is initialized to -1 (see EventAction.hh) so this block 
     // of code is executed only at the end of the first event. After the first execution 
-    // fAbsorberId gets a non-negative value and this block is skipped for all subsequent 
+    // fPVC_Id gets a non-negative value and this block is skipped for all subsequent 
     // events.
-    if (fAbsorberId < 0)
+    if (fPVC_Id < 0)
     {
-      // Task 4c.2: Retrieve fAbsorberId from sdm: the name of the hit collection to retrieve is
-      //  "absorber/energy"
+      fPVC_Id = sdm->GetCollectionID("PVCLayer/energy"); 
+      G4cout << "EventAction: PVCLayer energy scorer ID: " << fPVC_Id << G4endl;
+      
       // Task 4d.2: ...and comment the block out (if you don't want to see a long error list)
       // fAbsorberId = sdm->....
-        G4cout << "EventAction: absorber energy scorer ID: " << fAbsorberId << G4endl;
     }
+
     // Task 4c.2: Similarly, retrieve fScintillatorId. How is the hit collection named?
     // As before, fScintillatorId is defined in EventAction.hh and initialized to -1
 
@@ -43,10 +52,10 @@ void EventAction::EndOfEventAction(const G4Event* event)
 
     G4int histogramId = 1;     // Note: We know this but in principle, we should ask
 
-    if (fAbsorberId >= 0)
+    if (fPVC_Id >= 0)
     {
-      /// Task 4c.2: Get and cast hit collection with energy in absorber
-      G4THitsMap<G4double>* hitMapA = nullptr;
+      /// Get and cast hit collection with energy in absorber
+      G4THitsMap<G4double>* hitMapA = dynamic_cast<G4THitsMap<G4double>*>(hcofEvent->GetHC(fPVC_Id)); 
       if (hitMapA)
       {
           for (auto pair : *(hitMapA->GetMap()))
@@ -62,7 +71,7 @@ void EventAction::EndOfEventAction(const G4Event* event)
       }
     }
 
-    if (fScintillatorId >= 0)
+    /*if (fScintillatorId >= 0)
     {
       // Task 4c.2: Get and cast hit collection with energy in scintillator
       G4THitsMap<G4double>* hitMapS = nullptr;
@@ -79,10 +88,10 @@ void EventAction::EndOfEventAction(const G4Event* event)
               // Task 4c.3. Store the position to the histogram	      
           }
       }
-    }
+    }*/
 
     // Hit collections IDs to be looped over ("Don't Repeat Yourself" principle)
-    vector<G4int> hitCollectionIds = {
+    /*vector<G4int> hitCollectionIds = {
         fScintillatorETId, fAbsorberETId
     };
     for (G4int collectionId : hitCollectionIds)
@@ -103,6 +112,6 @@ void EventAction::EndOfEventAction(const G4Event* event)
 
                 // Task 4d.3: Add the ntuple row
             }
-        }*/
-    }
+        }
+    }*/
 }
