@@ -4,6 +4,7 @@
 #include <G4AccumulableManager.hh>
 #include <G4SystemOfUnits.hh>
 #include <G4Timer.hh>
+#include <Analysis.hh>
 
 // Task 4c.3: Include the necessary Analysis.hh
  
@@ -28,22 +29,22 @@ RunAction::RunAction(LabInfo *info_) :
   accumulableManager->RegisterAccumulable(fTotalTrackLength);
 
   // Task 4c.3: Uncomment the following 4 lines to enable analysis.
-  /* G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
+  G4AnalysisManager* analysisManager = G4AnalysisManager::Instance();
   analysisManager->SetVerboseLevel(1);
   analysisManager->SetFirstNtupleId(1);
-  analysisManager->SetFirstHistoId(1); */
+  analysisManager->SetFirstHistoId(1); 
 
-  // Create histogram to be used in 4c
-  // Task 4c.3: Create histogram with 20 bins, with limits of 50 and 60 cm
+  // Create histogram with 20 bins, with limits of 50 and 60 cm
   // (i.e. each bin will correspond to one layer of the calorimeter)
   // NOTICE: the unit of measurement should go in the FillH1(), not in the 
-  //  CreateH1()
+  analysisManager->CreateH1("eDep", "myTitle", 20, 50/cm, 60/cm);
+
 
   // Task 4d.3: Create ntuple containing 5 double fields:
   //   EnergyDeposit, Time, X, Y & Z
 
   // Task 4c.3: Open file task (extension will be added automatically)
-  // analysisManager->OpenFile("task4");
+  analysisManager->OpenFile("task4");
 }
 
 
@@ -109,10 +110,8 @@ void RunAction::EndOfRunAction(const G4Run* aRun)
 RunAction::~RunAction()
 {
   delete fTimer;  
-  // Task 4c.3: Write the analysis objects by uncommmenting the 
-  // following lines. 
-  // G4AnalysisManager* man = G4AnalysisManager::Instance();
-  // man->Write();
+  G4AnalysisManager* man = G4AnalysisManager::Instance();
+  man->Write();
 
   
 }

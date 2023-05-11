@@ -12,7 +12,6 @@ public:
     virtual ~ActionInitialization();
 
     void Build() const override;
-
     void BuildForMaster() const override;  
 
 private:

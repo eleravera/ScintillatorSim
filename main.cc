@@ -8,13 +8,13 @@
 #include "G4MTRunManager.hh"
 #include "G4UnitsTable.hh"
 #include "G4UImanager.hh"
-
 #include "G4VisExecutive.hh"
 #include "G4UIExecutive.hh"
 
 #include "LabInfo.hh"
 #include "DetectorConstruction.hh"
 #include "ActionInitialization.hh"
+#include "Analysis.hh"
 // global variable to write output
 //#include <common.hh>
  
@@ -52,14 +52,13 @@ int main(int argc, char** argv) {
   
   G4String macro;
   G4String session;
-  G4int nThreads = 1;
-
 
   for ( G4int i=1; i<argc; i=i+2 ) {
     if      ( G4String(argv[i]) == "-m" ) macro   = argv[i+1];
    // else if ( G4String(argv[i]) == "-r" ) info->seed  = atoi(argv[i+1]);
 // #ifdef G4MULTITHREADED
 //     else if ( G4String(argv[i]) == "-t" ) {
+//        G4int nThreads = 1;
 // 		    nThreads = G4UIcommand::ConvertToInt(argv[i+1]);
 //     }
 // #endif
@@ -268,8 +267,11 @@ int main(int argc, char** argv) {
   }
 
   delete visManager;
-
   delete runManager;
+
+  // Close the analysis output by uncommmenting the following lines
+  G4AnalysisManager* man = G4AnalysisManager::Instance();
+  man->CloseFile();
 
   return 0;
 }

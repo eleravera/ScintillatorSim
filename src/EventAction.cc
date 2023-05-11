@@ -6,7 +6,6 @@
 #include <G4Event.hh>
 
 #include "Analysis.hh"
-
 // Task 4d.2: Uncomment the following line
 // #include "EnergyTimeHit.hh" 
 
@@ -67,6 +66,9 @@ void EventAction::EndOfEventAction(const G4Event* event)
 	      //In short:
               G4double x = 50.25 + (pair.first * 1.0);   // already in cm
               // Task 4c.3. Store the position to the histogram
+              //G4CsvAnalysisManager* analysisManager = G4CsvAnalysisManager::Instance();
+
+              analysis->FillH1(histogramId, x, energy / keV);
           }
       }
     }
@@ -101,7 +103,7 @@ void EventAction::EndOfEventAction(const G4Event* event)
         // EnergyTimeHitsCollection* hitCollection = ...;
 
         // Task 4d.3: Uncomment the following block
-        /* if (hitCollection)
+         if (hitCollection)
         {
             for (auto hit: *hitCollection->GetVector())
             {
