@@ -8,8 +8,11 @@
 
 using namespace std;
 
-PrimaryGeneratorAction::PrimaryGeneratorAction()
+PrimaryGeneratorAction::PrimaryGeneratorAction(LabInfo *info_)  
+: G4VUserPrimaryGeneratorAction()
 {
+    info = info_;
+
     fGPS = new G4GeneralParticleSource();
     G4ParticleDefinition* electron = G4ParticleTable::GetParticleTable()->FindParticle("e-");
 

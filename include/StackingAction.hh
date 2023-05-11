@@ -4,23 +4,22 @@
 #include <G4UserStackingAction.hh>
 #include <G4Track.hh>
 
+#include "LabInfo.hh" 
+
 class RunAction;
 
 class StackingAction : public G4UserStackingAction
 {
 public:
-  //! constructor
-  StackingAction(RunAction* const );
-
-  //! destructor
-  ~StackingAction(){;};
+  StackingAction(LabInfo* info, RunAction* const fRunAction);
+  virtual ~StackingAction();
 
   //! Main interface
-  G4ClassificationOfNewTrack   ClassifyNewTrack (const G4Track*);
+  G4ClassificationOfNewTrack   ClassifyNewTrack (const G4Track* aTrack);
 
-private:
+private: 
   RunAction* fRunAction;
-
+  LabInfo *info; 
 };
 
 #endif

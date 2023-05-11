@@ -4,24 +4,23 @@
 #include <G4Step.hh>
 #include <G4Electron.hh>
 
-SteppingAction::SteppingAction(RunAction* runAction)
-    : fRunAction(runAction)
+SteppingAction::SteppingAction(LabInfo *info_, RunAction* runAction)
+    : G4UserSteppingAction(), fRunAction(runAction)
 {
+    info = info_;
 }
+
+SteppingAction::~SteppingAction(){}
 
 void SteppingAction::UserSteppingAction(const G4Step* aStep)
 {
-  // Task 4a.2: Get the volume where the step starts (the length is inside).
   G4VPhysicalVolume* volume = aStep->GetPreStepPoint()->GetTouchable()->GetVolume();
 
-
   //   Take care, because this volume might not be available: be sure that the pointer  
-  //   "volume" is non-NULL, otherwise any volume->Get... would cause a crash.
-  if ((volume!=NULL) && (volume->GetName() == "absorber0") && (aStep->GetTrack()->GetParticleDefinition() == G4Electron::Electron()) ) 
+  //   "volume" is non-NULL, otherwise  any volume->Get... would cause a crash.
+  if ((volume!=NULL) && (volume->GetName() == "PVC") && (aStep->GetTrack()->GetParticleDefinition() == G4Electron::Electron()) ) 
     { 
       fRunAction->AddTrackLength(aStep->GetStepLength()); 
     }   
-  // Task 4a.2: If the volume exists and has a proper name (absorber0), use the appropriate
-  //   run action method to accumulate the track length. Apply this
-  //   only for electrons.
+
 }

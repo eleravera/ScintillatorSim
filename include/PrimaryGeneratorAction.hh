@@ -5,13 +5,13 @@
 
 #include "LabInfo.hh"
 
-class G4GeneralParticleSource;
+class G4GeneralParticleSource; 
 
 class PrimaryGeneratorAction : public G4VUserPrimaryGeneratorAction
 {
 public:
-    PrimaryGeneratorAction();
-    ~PrimaryGeneratorAction();
+    PrimaryGeneratorAction(LabInfo* info);
+    virtual ~PrimaryGeneratorAction();
     void GeneratePrimaries(G4Event* anEvent) override;
 
 private:

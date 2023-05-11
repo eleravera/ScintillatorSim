@@ -3,17 +3,22 @@
 #include <G4Electron.hh>
 #include <G4AccumulableManager.hh>
 #include <G4SystemOfUnits.hh>
+#include <G4Timer.hh>
 
 // Task 4c.3: Include the necessary Analysis.hh
-
-RunAction::RunAction() : 
+ 
+RunAction::RunAction(LabInfo *info_) : 
   G4UserRunAction(),
+  fTimer(0),
   fNGammas("NGammas", 0),
   fNElectrons("NElectrons", 0),
   fAverageGammaEnergy("AvgGammaEnergy",0.),
   fAverageElectronEnergy("AvgElectronEnergy",0.),
   fTotalTrackLength("TotalTrackLength",0.)
 {
+  info = info_;
+  fTimer = new G4Timer;  
+
   // Register created accumulables
   G4AccumulableManager* accumulableManager = G4AccumulableManager::Instance();
   accumulableManager->RegisterAccumulable(fNGammas);
@@ -42,17 +47,24 @@ RunAction::RunAction() :
 }
 
 
-void RunAction::BeginOfRunAction(const G4Run*)
+void RunAction::BeginOfRunAction(const G4Run* aRun)
 {
+  fTimer->Start();
+
   // Reset all accumulables to their initial values
   G4AccumulableManager* accumulableManager = G4AccumulableManager::Instance();
   accumulableManager->Reset();
 }
 
-void RunAction::EndOfRunAction(const G4Run* run)
+void RunAction::EndOfRunAction(const G4Run* aRun)
 {
+  fTimer->Stop();
+  info->timer[0] = fTimer->GetRealElapsed();
+  info->timer[1] = fTimer->GetSystemElapsed();
+  info->timer[2] = info->timer[2] + fTimer->GetUserElapsed();
+  
   //retrieve the number of events produced in the run
-  G4int nofEvents = run->GetNumberOfEvent();
+  G4int nofEvents = aRun->GetNumberOfEvent();
 
   //do nothing, if no events were processed
   if (nofEvents == 0) return;
@@ -96,10 +108,13 @@ void RunAction::EndOfRunAction(const G4Run* run)
 
 RunAction::~RunAction()
 {
+  delete fTimer;  
   // Task 4c.3: Write the analysis objects by uncommmenting the 
   // following lines. 
   // G4AnalysisManager* man = G4AnalysisManager::Instance();
   // man->Write();
+
+  
 }
 
 void RunAction::AddSecondary(const G4ParticleDefinition* particle,
@@ -120,6 +135,5 @@ void RunAction::AddSecondary(const G4ParticleDefinition* particle,
 
 void RunAction::AddTrackLength(G4double trackLength)
 {
-    // Task 4a.2: Add the track length to the appropriate parameter
     fTotalTrackLength += trackLength;
 }

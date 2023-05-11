@@ -160,7 +160,7 @@ void DetectorConstruction::constructPVC() {
 
     for (int i = 0; i < info->PVCNumOfLayer; i++)
     {
-        ostringstream aName; aName << "PVC_Layer" << i;
+        ostringstream aName; aName << "PVC" << i;
         //new G4PVPlacement(nullptr, PVCLayerPositions[i],
 		//	  logicPVC, aName.str(), logicWorld, 0, i, checkOverlaps);
 

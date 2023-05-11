@@ -3,18 +3,20 @@
 
 #include <G4UserSteppingAction.hh>
 
+#include "LabInfo.hh" 
+
 class RunAction;
-
+ 
 class SteppingAction : public G4UserSteppingAction
-{
+{ 
 public:
-    //! constructor
-    SteppingAction(RunAction*);
+    SteppingAction(LabInfo* info, RunAction* fRunAction);
+    virtual ~SteppingAction();
 
-    void UserSteppingAction(const G4Step*) override;
+    void UserSteppingAction(const G4Step* aStep) override;
 
 private:
     RunAction* fRunAction;
+    LabInfo *info; 
 };
-
 #endif

@@ -115,7 +115,7 @@ int main(int argc, char** argv) {
     info->PVCSize[0]        =  100.0; // mm 
     info->PVCSize[1]        =  100.0; // mm 
     info->PVCSize[2]        =  1.0; // mm 
-    info->PVCNumOfLayer     = 3;
+    info->PVCNumOfLayer     = 50;
 
     // Position of PVC in the world volume
     info->PVCPos[0] 	      =  0.0; // mm
@@ -175,7 +175,7 @@ int main(int argc, char** argv) {
   // for electrons, option4 is the most accurate because it includes single coulomb scattering, and the models for msc are different in opt3 and 4
   
   // User action initialization
-  runManager->SetUserInitialization(new ActionInitialization()); 
+  runManager->SetUserInitialization(new ActionInitialization(info)); 
   
   // Initialize visualization
   // G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.

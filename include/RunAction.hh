@@ -6,23 +6,31 @@
 #include <G4ParticleDefinition.hh>
 #include <G4Accumulable.hh>
 
-class RunAction : public G4UserRunAction
+#include "LabInfo.hh" 
+
+class G4Timer;
+class G4Run;
+
+class RunAction : public G4UserRunAction 
 {
 public:
-  //! constructor
-  RunAction();
+  //! constructor 
+  RunAction(LabInfo* info);
 
   //! destructor
   ~RunAction();
 
   //! Main interface
-  void BeginOfRunAction(const G4Run*);
-  void EndOfRunAction(const G4Run*);
+  void BeginOfRunAction(const G4Run* aRun);
+  void EndOfRunAction(const G4Run* aRun);
 
   void AddSecondary(const G4ParticleDefinition*, G4double energy);
   void AddTrackLength(G4double length);
 
 private: 
+  G4Timer* fTimer;
+  LabInfo *info;
+
   G4Accumulable<G4int>    fNGammas;
   G4Accumulable<G4int>    fNElectrons;
   G4Accumulable<G4double> fAverageGammaEnergy;
