@@ -37,7 +37,7 @@ RunAction::RunAction(LabInfo *info_) :
   // Create histogram with 20 bins, with limits of 50 and 60 cm
   // (i.e. each bin will correspond to one layer of the calorimeter)
   // NOTICE: the unit of measurement should go in the FillH1(), not in the 
-  analysisManager->CreateH1("eDep", "myTitle", 20, 50/cm, 60/cm);
+  analysisManager->CreateH1("eDep", "myTitle", info->PVCNumOfLayer, info->PVCPos[2]/mm, info->PVCPos[2]/mm + info->PVCNumOfLayer* info->PVCSize[2]/mm);
 
 
   // Task 4d.3: Create ntuple containing 5 double fields:

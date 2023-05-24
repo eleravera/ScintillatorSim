@@ -27,7 +27,6 @@ public:
     
     G4int seed;
     G4int optPhysVerb;
-//     G4int verbose;
     
     G4double stepLimiter;
     

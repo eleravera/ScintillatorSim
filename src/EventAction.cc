@@ -4,9 +4,9 @@
 #include <G4THitsMap.hh>
 #include <G4SystemOfUnits.hh>
 #include <G4Event.hh>
+#include <G4RunManager.hh>
 
 #include "Analysis.hh"
-// Task 4d.2: Uncomment the following line
 // #include "EnergyTimeHit.hh" 
 
 using namespace std;
@@ -17,7 +17,7 @@ EventAction::EventAction(LabInfo *info_)
     info = info_;
 }
 
-EventAction::~EventAction(){}
+EventAction::~EventAction(){;}
 
 
 void EventAction::EndOfEventAction(const G4Event* event)
@@ -27,6 +27,8 @@ void EventAction::EndOfEventAction(const G4Event* event)
 
     //Get the hit collections: If there is no hit collection, there is nothing to be done
     G4HCofThisEvent* hcofEvent = event->GetHCofThisEvent();
+    G4cout << "GetHCofThisEvent: " << hcofEvent->GetNumberOfCollections() << G4endl; 
+
     if(!hcofEvent) return;
 
 
@@ -36,61 +38,38 @@ void EventAction::EndOfEventAction(const G4Event* event)
     // events.
     if (fPVC_Id < 0)
     {
-      fPVC_Id = sdm->GetCollectionID("PVCLayer/energy"); 
+      //fPVC_Id = sdm->GetSDMpointer()->GetCollectionID("PVCLayerScorerDetector/energy"); 
+      fPVC_Id = sdm->GetCollectionID("PVCLayerScorerDetector/energy"); 
       G4cout << "EventAction: PVCLayer energy scorer ID: " << fPVC_Id << G4endl;
-      
-      // Task 4d.2: ...and comment the block out (if you don't want to see a long error list)
-      // fAbsorberId = sdm->....
     }
-
-    // Task 4c.2: Similarly, retrieve fScintillatorId. How is the hit collection named?
-    // As before, fScintillatorId is defined in EventAction.hh and initialized to -1
-
-    // Task 4d.2: ...Retrieve fAbsorberETId. What's the name to be used?
-    // Task 4d.2: ...Retrieve fScintillatorETId
 
     G4int histogramId = 1;     // Note: We know this but in principle, we should ask
 
     if (fPVC_Id >= 0)
     {
       /// Get and cast hit collection with energy in absorber
-      G4THitsMap<G4double>* hitMapA = dynamic_cast<G4THitsMap<G4double>*>(hcofEvent->GetHC(fPVC_Id)); 
-      if (hitMapA)
-      {
-          for (auto pair : *(hitMapA->GetMap()))
-          {
-              G4double energy = *(pair.second);
-	      //The position of the center of the i-th absorber is given by
-	      //  50 * cm + thickness / 2 + i*2 * thickness, 
-              //with thickness=0.5*cm. See lines 87 and 93 of DetectorConstruction.cc
-	      //In short:
-              G4double x = 50.25 + (pair.first * 1.0);   // already in cm
-              // Task 4c.3. Store the position to the histogram
-              //G4CsvAnalysisManager* analysisManager = G4CsvAnalysisManager::Instance();
+      G4THitsMap<G4double>* hitMap = dynamic_cast<G4THitsMap<G4double>*>(hcofEvent->GetHC(fPVC_Id));
+      
+      G4cout<< "EventID: "<< event->GetEventID()  << G4endl; 
 
-              analysis->FillH1(histogramId, x, energy / keV);
-          }
+
+      if (hitMap){
+        G4cout << "sizeof hitMap->GetMap(): " << hitMap->entries() << G4endl;
+        G4int myInt  {0};
+        for (auto pair : *(hitMap->GetMap()))
+            {  
+            G4cout << "Entra nel loop " <<myInt<< G4endl;
+            G4double energy = *(pair.second);
+	        //The positions of the center of the i-th PVC layer are:
+            G4double x = info->PVCPos[2]/mm + info->PVCSize[2]*0.5/mm + (pair.first * info->PVCSize[2]/mm);   
+
+            G4cout << "HITMAP: first-> " <<(pair.first)<<" and second->" << *(pair.second) << G4endl; 
+
+            analysis->FillH1(histogramId, x, energy / keV);
+            myInt = myInt+1;
+            }
       }
     }
-
-    /*if (fScintillatorId >= 0)
-    {
-      // Task 4c.2: Get and cast hit collection with energy in scintillator
-      G4THitsMap<G4double>* hitMapS = nullptr;
-      if (hitMapS)
-      {
-          for (auto pair : *(hitMapS->GetMap()))
-          {
-              G4double energy = *(pair.second);
-	      //The position of the center of the i-th scintillator is given by
-	      //  50 * cm + thickness / 2 + (i*2 +1) * thickness, 
-              //with thickness=0.5*cm. See lines 87 and 94 of DetectorConstruction.cc
-	      //In short:
-              G4double x = 50.75 + (pair.first * 1.0);   // already in cm
-              // Task 4c.3. Store the position to the histogram	      
-          }
-      }
-    }*/
 
     // Hit collections IDs to be looped over ("Don't Repeat Yourself" principle)
     /*vector<G4int> hitCollectionIds = {

@@ -12,7 +12,7 @@ SteppingAction::SteppingAction(LabInfo *info_, RunAction* runAction)
 
 SteppingAction::~SteppingAction(){}
 
-void SteppingAction::UserSteppingAction(const G4Step* aStep)
+void SteppingAction::UserSteppingAction(const G4Step* aStep) 
 {
   G4VPhysicalVolume* volume = aStep->GetPreStepPoint()->GetTouchable()->GetVolume();
 
@@ -22,5 +22,11 @@ void SteppingAction::UserSteppingAction(const G4Step* aStep)
     { 
       fRunAction->AddTrackLength(aStep->GetStepLength()); 
     }   
+
+
+  G4cout <<" aStep->GetTrack()->GetTrackID(): " << aStep->GetTrack()->GetTrackID() << G4endl;
+  G4cout <<" aStep->GetTrack()->GetParentID(): " << aStep->GetTrack()->GetParentID() << G4endl;
+  G4cout <<" aStep->GetTrack()->GetCurrentStepNumber(): " << aStep->GetTrack()->GetCurrentStepNumber() << G4endl;
+  G4cout <<" aStep->GetTotalEnergyDeposit(): " << aStep->GetTotalEnergyDeposit() << G4endl;
 
 }

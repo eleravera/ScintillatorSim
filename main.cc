@@ -1,4 +1,3 @@
-
 #include "G4SystemOfUnits.hh"
 #include "QGSP_BERT.hh"
 #include "G4OpticalPhysics.hh"
@@ -6,6 +5,7 @@
 #include "G4StepLimiterPhysics.hh"
 #include "G4RunManager.hh"
 #include "G4MTRunManager.hh"
+#include <G4RunManagerFactory.hh>
 #include "G4UnitsTable.hh"
 #include "G4UImanager.hh"
 #include "G4VisExecutive.hh"
@@ -14,71 +14,18 @@
 #include "LabInfo.hh"
 #include "DetectorConstruction.hh"
 #include "ActionInitialization.hh"
+#include "PhysicsList.hh"
 #include "Analysis.hh"
-// global variable to write output
-//#include <common.hh>
- 
-// concurrent vector to write output in multithread mode without conflicts 
-// currently multithread not active
-//tbb::concurrent_vector<detection> detection_vector1;
-//tbb::concurrent_vector<detection> detection_vector2;
 
-namespace {
+using namespace std;
 
-  void PrintUsage() {
-    G4cerr << " Usage: " << G4endl;
-    G4cerr << " Lab [-m macro ] [-r seed] "  << G4endl;
-//     G4cerr << " Lab [-m macro ] [-u UIsession] [-t nThreads] [-r seed] "  << G4endl;
-//     G4cerr << " Lab [-t nThreads] [-r seed] "  << G4endl;
-//     G4cerr << "   note: -t option is available only for multi-threaded mode." << G4endl;
-  }
-}
+/// Main function that enables to:
+/// - run any number of macros (put them as command-line arguments)
+/// - start interactive UI mode (no arguments or "-i")
 
-
-
-int main(int argc, char** argv) {
-    
-  // Evaluate arguments
-  if ( argc > 5 ) {
-    PrintUsage();
-    return 1;
-  }
-  
-  // Detect interactive mode (if no arguments) and define UI session
-  G4UIExecutive* ui = 0;
-  if ( argc == 1 ) {
-    ui = new G4UIExecutive(argc, argv);
-  }
-  
-  G4String macro;
-  G4String session;
-
-  for ( G4int i=1; i<argc; i=i+2 ) {
-    if      ( G4String(argv[i]) == "-m" ) macro   = argv[i+1];
-   // else if ( G4String(argv[i]) == "-r" ) info->seed  = atoi(argv[i+1]);
-// #ifdef G4MULTITHREADED
-//     else if ( G4String(argv[i]) == "-t" ) {
-//        G4int nThreads = 1;
-// 		    nThreads = G4UIcommand::ConvertToInt(argv[i+1]);
-//     }
-// #endif
-    else {
-      PrintUsage();
-      return 1;
-    }
-}
-
-  // Choose the Random engine
-  G4Random::setTheEngine(new CLHEP::RanecuEngine);
-
-//   G4RunManager * runManager = new G4RunManager;
-  
-  G4RunManager * runManager = new G4RunManager;
-  //G4MTRunManager * runManager = new G4MTRunManager;
-  //runManager->SetNumberOfThreads(nThreads);
-  
-  
-    /* get all information */
+int main(int argc, char** argv)
+{
+   /* get all information */
     LabInfo *info = NULL;
     if((info = new LabInfo()) == NULL ) {
         G4cerr << "Impossible to create LabInfo" << G4endl;
@@ -92,7 +39,6 @@ int main(int argc, char** argv) {
     
     info->seed                = (G4int)time(0); // use fixed seed for tests (e.g. 0), random number for simulation, e.g. (G4int)time(0);
     info->optPhysVerb         = 2;  // verbosity level of optical photons physics (0 -> 1)
-    //info->verbose             = 2;   // global verbose level (0 -> 2), overidden by macro if given
     info->stepLimiter         = 100.0*um; // to be changed
     
     // World dimensions
@@ -114,7 +60,7 @@ int main(int argc, char** argv) {
     info->PVCSize[0]        =  100.0; // mm 
     info->PVCSize[1]        =  100.0; // mm 
     info->PVCSize[2]        =  1.0; // mm 
-    info->PVCNumOfLayer     = 50;
+    info->PVCNumOfLayer     =  50;
 
     // Position of PVC in the world volume
     info->PVCPos[0] 	      =  0.0; // mm
@@ -142,7 +88,7 @@ int main(int argc, char** argv) {
     info->scintToSiPMFinish = "polished";    
     
     // Primary beam settings
-    info->numOfEvents         = 1;                          // number of primary particles to generate
+    info->numOfEvents         = 100;                          // number of primary particles to generate
  
  
 
@@ -152,127 +98,57 @@ int main(int argc, char** argv) {
     // 
     // ****************************************************************
     
-      
-  
-  // Seed the random number generator manually
-  G4Random::setTheSeed(info->seed);
 
-  // Set mandatory initialization classes
-  
-  // Detector construction
-  runManager-> SetUserInitialization(new DetectorConstruction(info));
 
-  // Physics list
-  G4VModularPhysicsList* physicsList = new QGSP_BERT;
-  physicsList->RegisterPhysics(new G4StepLimiterPhysics()); // add step limiter
-  physicsList->ReplacePhysics(new G4EmStandardPhysics_option4()); // replace EM physics option (try option3 and option4)
-  //physicsList->ReplacePhysics(new G4EmLivermorePhysics()); // replace EM physics with Livermore
-  //physicsList->RegisterPhysics(new G4OpticalPhysics(info->optPhysVerb)); // add optical physics to list
-  runManager->SetUserInitialization(physicsList);
-  // options 3 and 4 are more accurate than 1 and 2 for low energy
-  // they have the same models for gammas
-  // for electrons, option4 is the most accurate because it includes single coulomb scattering, and the models for msc are different in opt3 and 4
-  
-  // User action initialization
-  runManager->SetUserInitialization(new ActionInitialization(info)); 
-  
-  // Initialize visualization
-  // G4VisExecutive can take a verbosity argument - see /vis/verbose guidance.
-  G4VisManager* visManager = new G4VisExecutive("Quiet");
-  visManager->Initialize();
-  
-  // Initialize G4 kernel
+  // construct the default run manager
+  auto runManager = G4RunManagerFactory::CreateRunManager();
+  // set mandatory initialization classes
+    G4cout <<"merda"<<G4endl; 
+
+  runManager->SetUserInitialization(new PhysicsList());
+  runManager->SetUserInitialization(new DetectorConstruction(info));
+  runManager->SetUserInitialization(new ActionInitialization(info));
+
+  // initialize G4 kernel
   runManager->Initialize();
 
-  // Get the pointer to the User Interface manager
-  G4UImanager* UImanager = G4UImanager::GetUIpointer(); 
-  
-//   if(info->verbose == 1){
-//     UImanager->ApplyCommand("/tracking/verbose 1");
-//   }else if(info->verbose == 2){
-//     UImanager->ApplyCommand("/tracking/verbose 2");
-//   }
-  
-  
-  if (macro.size()) {
+  G4cout <<"merda"<<G4endl; 
 
-      G4cout << "Executing macro..." <<  G4endl;
-      // Batch mode
-      G4String command = "/control/execute ";
-      UImanager->ApplyCommand(command+macro);
-  }
-  else{
-    // interactive mode
-    UImanager->ApplyCommand("/control/execute init_vis.mac");
+
+  // get the pointer to the UI manager
+  G4UImanager* UImanager = G4UImanager::GetUIpointer();
+  UImanager->ApplyCommand("/run/verbose 1");
+  UImanager->ApplyCommand("/event/verbose 1");
+  UImanager->ApplyCommand("/tracking/verbose 1");
+
+  //
+  G4VisManager* visManager = new G4VisExecutive("Quiet");
+  visManager->Initialize();
+
+
+  if ( argc == 1 ) {
+    // interactive mode : define UI session
+    G4UIExecutive* ui = new G4UIExecutive(argc, argv);
+    UImanager->ApplyCommand("/control/execute macros/init_vis.mac");
     ui->SessionStart();
     delete ui;
   }
-  
-  //G4String posList[] = {"-180.0", "-140.0", "-100.0", "-60.0", "-20.0", "0.0", "20.0", "60.0", "100.0", "140.0", "180.0"};
-  G4String posList[] = {"0.0"};
-  G4int numPos = sizeof(posList)/sizeof(G4String);
-  
-  for (int currPos = 0; currPos < numPos; currPos++){
-    
-    G4cout << "beam position: " << posList[currPos] << " mm" << G4endl;
-    UImanager->ApplyCommand("/gps/position   0.0 -150.0 "+posList[currPos]+" mm");
-    
-    // clears output vectors before run
-    /*detection_vector1.clear();         
-    detection_vector2.clear(); */ 
-    
-    info->summaryFileName = "./info.txt";
-  
-  // clears output file before run
-    FILE* fileInfo = NULL;
-      if((fileInfo = fopen(info->summaryFileName,"wr")) == NULL) {
-        G4cout << "Impossible to open the file " << info->summaryFileName << " for writing" << G4endl;
-      }
-      if((fclose(fileInfo)) == EOF) {
-        G4cerr << "Impossible to close the file " << info->summaryFileName << G4endl;
-      }
-  
-    info->event_id = 0; // updated in PrimaryGeneratorAction to return event number
-    info->Detection1 = 0;       
-    info->Detection2 = 0;       
-  
-    runManager->BeamOn(info->numOfEvents); // runs simulation
-
-  // Write results to output
-    
-    /*std::ofstream file_out2("./detect1_"+posList[currPos]+".raw");
-    for (uint32_t i=0; i<detection_vector1.size(); i++) {
-      file_out2.write(reinterpret_cast<char*>(&detection_vector1[i]), sizeof(detection));
-    }
-    file_out2.close();*/
-  
-    /*std::ofstream file_out3("./detect2_"+posList[currPos]+".raw");
-    for (uint32_t i=0; i<detection_vector2.size(); i++) {
-      file_out3.write(reinterpret_cast<char*>(&detection_vector2[i]), sizeof(detection));
-    }
-    file_out3.close();*/
-    
-    info->dump();
-    
-     // Print out some particle counters at the end of the simulation
-      G4cout << G4endl;
-      G4cout << "Detection1:              " << info->Detection1 << G4endl;
-      G4cout << "Detection2:              " << info->Detection2 << G4endl;
-      G4cout << G4endl;
-  
-    // Job termination
-    // Free the store: user actions, physics_list and detector_description are
-    //                 owned and deleted by the run manager, so they should not
-    //                 be deleted in the main() program !
+  else {
+    // batch mode
+    G4String command = "/control/execute ";
+    G4String fileName = argv[1];
+    UImanager->ApplyCommand(command+fileName);
   }
 
-  delete visManager;
+
+  // start a run
+  //runManager->BeamOn(info->numOfEvents);
+
+  // job termination
   delete runManager;
 
-  // Close the analysis output by uncommmenting the following lines
-  G4AnalysisManager* man = G4AnalysisManager::Instance();
-  man->CloseFile();
+return 0;
 
-  return 0;
+
+  
 }
-

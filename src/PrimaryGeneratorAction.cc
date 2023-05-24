@@ -17,9 +17,9 @@ PrimaryGeneratorAction::PrimaryGeneratorAction(LabInfo *info_)
     G4ParticleDefinition* electron = G4ParticleTable::GetParticleTable()->FindParticle("e-");
 
     fGPS->SetParticleDefinition(electron);
-    fGPS->GetCurrentSource()->GetEneDist()->SetMonoEnergy(10 * MeV);
-    fGPS->GetCurrentSource()->GetAngDist()->SetParticleMomentumDirection(G4ThreeVector(0., 0., -1.));
-    fGPS->GetCurrentSource()->GetPosDist()->SetCentreCoords(G4ThreeVector(0., 0., 100. * mm));
+    fGPS->GetCurrentSource()->GetEneDist()->SetMonoEnergy(10. * MeV);
+    fGPS->GetCurrentSource()->GetAngDist()->SetParticleMomentumDirection(G4ThreeVector(0., 0., +1.));
+    fGPS->GetCurrentSource()->GetPosDist()->SetCentreCoords(G4ThreeVector(0., 0., - 10. * mm));
     fGPS->GetCurrentSource()->GetPosDist()->SetPosDisType("Beam");
     fGPS->GetCurrentSource()->GetPosDist()->SetBeamSigmaInR(0);
 
@@ -48,7 +48,7 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
    }*/
 
     fGPS->GeneratePrimaryVertex(anEvent);
-    /*info->event_id++;
+    info->event_id++;
     if(info->numOfEvents >= 100){
         G4int percent = info->event_id/(info->numOfEvents/100);
         if(info->event_id%(info->numOfEvents/100) == 0){ // %
@@ -63,5 +63,5 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* anEvent)
     info->beamPos[2]   = fGPS->GetParticlePosition().z()/mm;
     info->beamDirection[0]   = fGPS->GetParticleMomentumDirection().x();
     info->beamDirection[1]   = fGPS->GetParticleMomentumDirection().y();
-    info->beamDirection[2]   = fGPS->GetParticleMomentumDirection().z();*/
+    info->beamDirection[2]   = fGPS->GetParticleMomentumDirection().z();
 }

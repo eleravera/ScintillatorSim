@@ -13,6 +13,7 @@
 #include <G4MultiFunctionalDetector.hh>
 #include <G4VPrimitiveScorer.hh>
 #include <G4PSEnergyDeposit.hh>
+//include <G4PSDoseDeposit.hh>
 
 #include <sstream>
 
@@ -37,8 +38,9 @@ G4VPhysicalVolume* DetectorConstruction::Construct(){
     defineMaterials();
     constructMaterialPropertiesTable();
     constructWorld();
-    constructScintillator();
     constructPVC();
+
+    //constructScintillator();
     //constructOpticalSurfaces();
     return physWorld;
   
@@ -146,42 +148,29 @@ void DetectorConstruction::constructPVC() {
     grey->SetVisibility(true);
     grey->SetForceSolid(true);
     logicPVC->SetVisAttributes(grey);
-    //logicPVC->SetVisAttributes( G4VisAttributes::GetInvisible() );
-
-    G4double minX =  info->PVCSize[2] / 2;
-
-
-    vector<G4ThreeVector> PVCLayerPositions;
-    for (int i = 0; i < info->PVCNumOfLayer; i++)
-    {
-        PVCLayerPositions.push_back({info->PVCPos[0]*mm, info->PVCPos[1]*mm, minX + i * info->PVCSize[2]*mm});
-        //scintillatorPositions.push_back({minX + (i * 2 + 1) * info->PVCthickness, 0, 0});
-        //physPVC  = new G4PVPlacement(0, G4ThreeVector(info->PVCPos[0]*mm, info->PVCPos[1]*mm, info->PVCPos[2]*mm), logicPVC, "PVC", logicWorld, false, 0, checkOverlaps); 
-    }
 
     for (int i = 0; i < info->PVCNumOfLayer; i++)
     {
+        G4ThreeVector PVCLayerPosition {info->PVCPos[0]*mm, info->PVCPos[1]*mm, info->PVCSize[2] *0.5 *mm + i * info->PVCSize[2]*mm};
+        if (checkOverlaps){
+            G4cout << "PVC layer " <<i<<" is placed at :" << PVCLayerPosition << G4endl; }
         ostringstream aName; aName << "PVCLayer" << i;
-        //new G4PVPlacement(nullptr, PVCLayerPositions[i],
-		//	  logicPVC, aName.str(), logicWorld, 0, i, checkOverlaps);
-        physPVC  = new G4PVPlacement(nullptr, PVCLayerPositions[i], logicPVC, aName.str(), logicWorld, false, 0, checkOverlaps);
+        physPVC  = new G4PVPlacement(nullptr, PVCLayerPosition, logicPVC, aName.str(), logicWorld, false, i, checkOverlaps);
     }
 }
 
-// Task 4c.1: Include the proper header for the multi-functional detector
-
-// Task 4c.1: Include the proper header for energy deposit primitive scorer
 
 void DetectorConstruction::ConstructSDandField()
 {
     G4SDManager* sdManager = G4SDManager::GetSDMpointer();
     sdManager->SetVerboseLevel(2);
 
-    G4MultiFunctionalDetector* PVCLayerDetector = new G4MultiFunctionalDetector("PVCLayer");
-    G4VPrimitiveScorer* PVCScorer = new G4PSEnergyDeposit("energy"); 
-    PVCLayerDetector->RegisterPrimitive(PVCScorer);
+    //Decide the scorer, assign multi-functional detectors to the logical volumes and register them to the SDmanager
+    G4MultiFunctionalDetector* PVCLayerDetector = new G4MultiFunctionalDetector("PVCLayerScorerDetector");
 
-    //Assign multi-functional detectors to the logical volumes and register them to the SDmanager
+    PVCLayerDetector->RegisterPrimitive(new G4PSEnergyDeposit("energy"));
+    //PVCLayerDetector->RegisterPrimitive(new G4PSDoseDeposit("TotalDose"));
+
     SetSensitiveDetector("PVCLayer", PVCLayerDetector);
     sdManager->AddNewDetector(PVCLayerDetector);
 
